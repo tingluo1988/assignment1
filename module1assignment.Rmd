@@ -1,0 +1,60 @@
+---
+title: "Module 1 Assignment"
+author: "Ting Luo"
+date: "March 15, 2016"
+output: html_document
+---
+
+#This is Ting Luo's module 1 assignment. 
+
+The question I want to answer is whether GDP per capita is more powerful indicator of life expectancy in Europe in 2007 vs. 1952. In other words, whether the beta coefficient is larger in 1952 compared to 2007. I hypothesize that the beta coefficient will be attenuated in 2007 due to medical advancements that dilutes the positive effects of GDP. In this exercise, I control for as many external factors by geographical region.
+
+First, import the gapminder dataset from my local machine and examine the dataset
+```{r}
+library(ggplot2)
+gapminder.FiveYearData <- read.csv("C:/Users/Ting Luo/my_project/data/gapminder-FiveYearData.csv")
+View(gapminder.FiveYearData)
+```
+
+Subsetting the gapminder dataset into observations from African continent in the year 1952
+```{r}
+Europe1952 <- gapminder.FiveYearData[which(gapminder.FiveYearData$continent=='Europe'
+& gapminder.FiveYearData$year == '1952'),] 
+```
+
+Subsetting the gapminder dataset into observations from African continent in the year 2007
+```{r}
+Europe2007 <- gapminder.FiveYearData[which(gapminder.FiveYearData$continent=='Europe'
+& gapminder.FiveYearData$year == '2007'),] 
+```
+
+```{r}
+
+lm_eqn <- function(Europe1952){
+    m <- lm(lifeExp ~ gdpPercap, Europe1952);
+    eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2, 
+         list(a = format(coef(m)[1], digits = 2), 
+              b = format(coef(m)[2], digits = 2), 
+             r2 = format(summary(m)$r.squared, digits = 3)))
+    as.character(as.expression(eq));                 
+}
+
+ggplot(Europe1952, aes(gdpPercap, lifeExp, xmax=50000,xmin=0)) + geom_point() + geom_smooth(method=lm) + geom_text(x=10000, y=60, label = lm_eqn(Europe1952), parse = TRUE)
+
+```
+
+```{r}
+lm_eqn <- function(Europe2007){
+    m <- lm(lifeExp ~ gdpPercap, Europe2007);
+    eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2, 
+         list(a = format(coef(m)[1], digits = 2), 
+              b = format(coef(m)[2], digits = 2), 
+             r2 = format(summary(m)$r.squared, digits = 3)))
+    as.character(as.expression(eq));                 
+}
+
+ggplot(Europe2007, aes(gdpPercap, lifeExp, xmax=50000,xmin=0)) + geom_point() +
+geom_smooth(method=lm) + geom_text(x=10000, y=80, label = lm_eqn(Europe2007), parse = TRUE)
+```
+
+As expected, the beta coefficient of the effect GDP per capita has on life expectancy becomes smaller in 2007 compared to 1952.
